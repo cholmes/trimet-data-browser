@@ -27,6 +27,9 @@ function check(name, pass, detail) {
 
 // Reaches into the page for the live MapLibre instance. MapView keeps it on the
 // component, so walk the Vue tree from the map container element.
+//
+// This needs Vue's component internals, which a production build strips. Run
+// this script against the dev server, not against `dist`.
 const MAP_PROBE = `(() => {
   const el = document.querySelector('.maplibregl-map');
   if (!el) return null;
@@ -99,7 +102,15 @@ await page.goto(`${BASE}/#/routes/collection.json`, { waitUntil: 'networkidle' }
 await page.waitForSelector('.maplibregl-map', { timeout: 30000 });
 
 // Wait for the basemap style to actually finish loading.
-await page.waitForFunction(`(() => { const m = ${MAP_PROBE}; return m && m.isStyleLoaded && m.isStyleLoaded() && m.getStyle() && !!m.getStyle().name; })()`, null, { timeout: 45000 });
+await page.waitForFunction(`(() => { const m = ${MAP_PROBE}; return m && m.isStyleLoaded && m.isStyleLoaded() && m.getStyle() && !!m.getStyle().name; })()`, null, { timeout: 45000 })
+  .catch(async () => {
+    const reachable = await page.evaluate(`!!${MAP_PROBE}`);
+    console.error(reachable
+      ? '\nThe map never finished loading its style. If the page was in a background\ntab, that is the cause: MapLibre renders on requestAnimationFrame, which does\nnot fire while hidden.'
+      : '\nCould not reach the MapLibre instance. This script needs Vue component\ninternals, which production builds strip — point it at the dev server.');
+    await browser.close();
+    process.exit(1);
+  });
 await page.waitForTimeout(4000);
 
 const mapState = await page.evaluate(`(() => {
