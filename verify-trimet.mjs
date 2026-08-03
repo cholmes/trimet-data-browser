@@ -135,6 +135,26 @@ check('maxBounds set to metro', JSON.stringify(mapState.maxBounds) === JSON.stri
 check('tiles fetched from tiles.trimet.org', tileRequests.length > 0, `${tileRequests.length} requests`);
 check('collection data layer rendered', mapState.stacLayers.length > 0, mapState.stacLayers.join(', ') || 'none');
 
+// The stack must read ground, buildings, data, labels — otherwise place names
+// get drawn over and 3D buildings bury the routes at street zoom.
+const STACK = `(() => {
+  const m = ${MAP_PROBE};
+  const layers = m.getStyle().layers.map((l, i) => ({ i, id: l.id, type: l.type }));
+  const ours = layers.filter(l => /^stac-|^routes$|parquet|pmtiles|footprint/i.test(l.id));
+  const symbols = layers.filter(l => l.type === 'symbol');
+  const extrusions = layers.filter(l => l.type === 'fill-extrusion');
+  return {
+    dataLayers: ours.length,
+    labelsOnTop: symbols.length === 0 || Math.min(...symbols.map(l => l.i)) > Math.max(...ours.map(l => l.i)),
+    buildingsBelow: extrusions.length === 0 || Math.max(...extrusions.map(l => l.i)) < Math.min(...ours.map(l => l.i)),
+    symbolCount: symbols.length,
+    extrusionCount: extrusions.length
+  };
+})()`;
+const stack = await page.evaluate(STACK);
+check('basemap labels draw above the data', stack.labelsOnTop, `${stack.symbolCount} symbol layers`);
+check('3D buildings draw below the data', stack.buildingsBelow, `${stack.extrusionCount} extrusion layers`);
+
 await page.screenshot({ path: `${OUT}/tm-02-routes-3d.png` });
 
 // ---------- 4. Bounds clamping ----------
@@ -174,6 +194,12 @@ for (const [idx, expected] of [[1, 'TriMet Dark 3D'], [2, 'TriMet Satellite']]) 
   await page.waitForTimeout(3500);
   const now = await page.evaluate(`(() => { const m = ${MAP_PROBE}; const s = m.getStyle(); return s && s.name; })()`);
   check(`switch to ${expected}`, now === expected, `style = ${now}`);
+  // Switching rebuilds every data layer against a fresh basemap, so the
+  // ordering has to be re-established rather than merely set up once.
+  const s = await page.evaluate(STACK);
+  check(`${expected} keeps labels above / buildings below`,
+    s.labelsOnTop && s.buildingsBelow && s.dataLayers > 0,
+    `data=${s.dataLayers} labelsOnTop=${s.labelsOnTop} buildingsBelow=${s.buildingsBelow}`);
   await page.screenshot({ path: `${OUT}/tm-0${3 + idx}-${expected.toLowerCase().replace(/ /g, '-')}.png` });
 }
 

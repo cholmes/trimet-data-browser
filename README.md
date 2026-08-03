@@ -46,11 +46,11 @@ Any `SB_*` environment variable overrides the matching key in `config.js`.
 ## Test
 
 ```sh
-pnpm run test:unit             # 310 unit tests
+pnpm run test:unit             # 320 unit tests
 pnpm run lint
 
 node_modules/.bin/vite --port 8080 --strictPort &
-node verify-trimet.mjs         # 22 end-to-end checks against live data
+node verify-trimet.mjs         # 26 end-to-end checks against live data
 ```
 
 `verify-trimet.mjs` is the one that matters for this fork: it asserts the brand colours, the three

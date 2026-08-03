@@ -15,6 +15,7 @@ these; leave the rest of the tree matching upstream so `git pull upstream main` 
 | File | Owns |
 | --- | --- |
 | `basemaps.config.js` | The three TriMet basemaps and `MAP_CONSTRAINTS` (bounds, zoom limits, home view) |
+| `StacMapLayer._addLayerBelowLabels` | Where data sits in the basemap stack (see Layer Order) |
 | `src/components/TriMetHeader.vue` | The blue bar, wordmark, stripes, MENU button |
 | `src/theme/variables.scss` | The palette and fonts, as Sass variables |
 | `src/theme/custom.scss` | Component-level styling, referencing those variables |
@@ -49,6 +50,25 @@ SB_catalogUrl=http://localhost:8081/catalog.json pnpm start
 
 Any `SB_*` environment variable overrides the matching key in `config.js`.
 
+## Layer Order
+
+The map stack is deliberate: **basemap ground, then 3D buildings, then the data, then all labels.**
+
+Upstream simply appends data layers on top, which put route lines through the middle of PORTLAND and
+every street name. Every data layer now goes in through `StacMapLayer._addLayerBelowLabels`, which
+anchors it before the basemap's first symbol layer. A collection style's *own* symbol layers are the
+exception and stay on top — those are the data's labels.
+
+The buildings need their own step. In TriMet's styles `building-3d` sits *between* the road labels
+and the place labels, so inserting data below the first symbol layer alone would bury the routes
+behind building footprints at street zoom. `_sinkBasemapExtrusions` moves any basemap
+`fill-extrusion` layer beneath our lowest data layer. It is idempotent, so it can run on every
+insert.
+
+All of this has to be re-established on every basemap switch, since `readdAfterStyleChange` tears the
+data layers down and rebuilds them against a fresh basemap. `tests/unit/layerOrder.spec.js` covers
+the ordering rules; `verify-trimet.mjs` asserts the stack holds after each switch.
+
 ## Verification
 
 `verify-trimet.mjs` is this fork's real test. It drives a browser against the live
@@ -58,10 +78,10 @@ bounds clamping both pan and zoom, and that a collection's data renders over the
 
 ```sh
 node_modules/.bin/vite --port 8080 --strictPort &
-node verify-trimet.mjs          # 22 checks, screenshots in ./verify-out
+node verify-trimet.mjs          # 26 checks, screenshots in ./verify-out
 ```
 
-`tests/unit` (310 tests) still applies and runs in CI.
+`tests/unit` (320 tests) still applies and runs in CI.
 
 `tests/e2e` does not. That suite is inherited and asserts the upstream product — a
 data-source picker at `/`, `/external/` routing, an API-backed search page — none of which
