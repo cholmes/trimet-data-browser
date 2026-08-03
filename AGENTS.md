@@ -28,12 +28,27 @@ cleaned up.
 
 ## Brand Facts
 
-Sampled from TriMet's own header, not guessed:
+**Two TriMet sites, two palettes.** The header follows trimet.org; the body and links follow
+developer.trimet.org, because that is where this browser's data is published. Keeping them apart is
+deliberate — do not "unify" the blues.
+
+Header chrome, sampled from trimet.org's own header:
 
 - Blue `#214B88` — header bar
 - Orange `#C04F2E` — diagonal stripes
 - Green `#4E8227` — MENU button
-- Source Sans Pro (300/400/600/700), the same family trimet.org loads
+- Source Sans Pro, the family trimet.org loads. Used for the wordmark only, as a logotype.
+
+Body and links, read as computed styles off
+`https://developer.trimet.org/gis/meta_tm_rail_stops.shtml`:
+
+- Text `#2E2D2A`, a warm near-black
+- Links `#084C8D`, underlined with `1px dotted #BBD4EE` that darkens to `#084C8D` on hover. The rule
+  is a **bottom border, not `text-decoration`** — that is how the developer site draws it, and
+  copying the mechanism rather than the appearance is what makes the two read alike.
+- `"Trebuchet MS", Arial, Helvetica, sans-serif` at 14.4px / 18px. Trebuchet is a core web font on
+  Windows and macOS and falls back to Arial elsewhere, exactly as the developer site does, so the two
+  degrade together. Nothing is downloaded for it.
 
 The wordmark is rebuilt in markup — `TRI` + the swirl mark + `MET` — because TriMet publishes no
 usable SVG. The swirl in `public/trimet-swirl.png` came from the catalog's `_assets/`.
@@ -78,7 +93,7 @@ bounds clamping both pan and zoom, and that a collection's data renders over the
 
 ```sh
 node_modules/.bin/vite --port 8080 --strictPort &
-node verify-trimet.mjs          # 28 checks, screenshots in ./verify-out
+node verify-trimet.mjs          # 34 checks, screenshots in ./verify-out
 ```
 
 `tests/unit` (320 tests) still applies and runs in CI.

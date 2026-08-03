@@ -147,6 +147,9 @@ export default {
   flex-shrink: 0;
   color: white;
   text-decoration: none;
+  // A logotype, so it keeps its own face while body copy follows
+  // developer.trimet.org into Trebuchet.
+  font-family: $tm-wordmark-font;
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.06em;

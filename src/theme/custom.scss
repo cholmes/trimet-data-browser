@@ -4,6 +4,39 @@
 // from a variable in variables.scss — no hex literals, so the palette has one home.
 
 #stac-browser {
+  // developer.trimet.org underlines links with a dotted bottom border that
+  // darkens to the link colour on hover, rather than text-decoration. Copying
+  // the mechanism, not just the look, is what makes this read as the same site.
+  //
+  // Scoped away from anything that is a link only structurally: buttons, cards,
+  // tabs and the header nav would all sprout stray rules otherwise.
+  // :where() keeps the exclusion list at zero specificity, so the resets below
+  // can still win with a single class instead of needing to out-specify a long
+  // :not() chain.
+  a:not(:where(.btn, .nav-link, .dropdown-item, .tm-link, .tm-brand, .card-link)) {
+    border-bottom: 1px dotted $tm-link-underline;
+
+    &:hover,
+    &:focus {
+      border-bottom-color: $tm-link;
+    }
+
+    // Links wrapping an image, icon or badge should not pick up a rule under it.
+    &:has(> img),
+    &:has(> svg),
+    &:has(> .badge) {
+      border-bottom: 0;
+    }
+  }
+
+  // The map is not part of the document's prose. Its attribution and controls
+  // come with MapLibre's own styling and should keep it.
+  .maplibregl-map a,
+  .maplibregl-ctrl a,
+  a.format-help {
+    border-bottom: 0;
+  }
+
   // The TriMet bar supplies the header's own colour and spacing; this row is the
   // page title strip beneath it.
   > header .page {
@@ -15,10 +48,12 @@
     }
   }
 
+  // Bold, sentence case — how the GIS metadata pages set "Description",
+  // "Geometry Type" and the rest. No negative tracking: that was tuned for a
+  // narrower face and only muddies Trebuchet.
   h2 {
     color: $tm-ink;
     font-weight: 700;
-    letter-spacing: -0.01em;
   }
 
   .card {
@@ -32,24 +67,26 @@
     }
   }
 
+  // Trebuchet ships no 600, so asking for one only invites a synthesised
+  // weight; 700 is what the developer site uses for emphasis anyway.
   .catalog-card .card-title {
     font-family: $font-family-sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1.05rem;
   }
 
   .catalog-card .intro {
     color: $tm-slate;
     font-size: 0.875rem;
-    line-height: 1.6;
+    line-height: 1.45;
   }
 
   .btn-primary {
-    font-weight: 500;
+    font-weight: 700;
   }
 
   .btn-outline-primary {
-    font-weight: 500;
+    font-weight: 700;
   }
 
   > footer {
@@ -58,9 +95,14 @@
     margin-top: 1rem;
   }
 
+  // The GIS pages set body copy at 1.25, which is tight for the long-form
+  // collection descriptions this browser shows. 1.4 matches what Description.vue
+  // already applies to rendered markdown, so prose is consistent throughout and
+  // that component needs no fork-specific edit. Everything else follows
+  // $line-height-base, which is the developer site's 1.25 exactly.
   .description {
-    color: $tm-slate;
-    line-height: 1.7;
+    color: $tm-ink;
+    line-height: 1.4;
   }
 
   .badge {

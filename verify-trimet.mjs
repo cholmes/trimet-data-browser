@@ -97,6 +97,29 @@ check('wordmark reads TRIMET', header.brandText?.startsWith('TRIMET'), header.br
 check('swirl asset referenced', !!header.swirlSrc, header.swirlSrc);
 check('no horizontal overflow', header.hOverflow === 0, `${header.hOverflow}px`);
 
+// ---------- 2a. developer.trimet.org typography ----------
+// Values are the computed styles on https://developer.trimet.org/gis/, so the
+// browser reads as part of that site rather than merely near it.
+const type = await page.evaluate(() => {
+  const b = getComputedStyle(document.body);
+  const content = [...document.querySelectorAll('a')].find(a =>
+    a.innerText.trim().length > 3 && !a.closest('.maplibregl-map') && !a.closest('header') && !a.className.includes('btn'));
+  const c = content ? getComputedStyle(content) : null;
+  const inMap = [...document.querySelectorAll('.maplibregl-map a, .maplibregl-ctrl a')]
+    .filter(a => getComputedStyle(a).borderBottomStyle === 'dotted').length;
+  return {
+    bodyFont: b.fontFamily, bodySize: b.fontSize, bodyLh: b.lineHeight, bodyColor: b.color,
+    linkColor: c && c.color, linkBorder: c && c.borderBottom, linkText: content && content.innerText.trim().slice(0, 20),
+    strayInMap: inMap,
+  };
+});
+check('body is Trebuchet MS', /^"?Trebuchet MS"?/.test(type.bodyFont), type.bodyFont);
+check('body is 14.4px / 18px', type.bodySize === '14.4px' && type.bodyLh === '18px', `${type.bodySize} / ${type.bodyLh}`);
+check('body text is #2E2D2A', type.bodyColor === 'rgb(46, 45, 42)', type.bodyColor);
+check('links are #084C8D', type.linkColor === 'rgb(8, 76, 141)', `${type.linkColor} (${type.linkText})`);
+check('links carry the dotted rule', type.linkBorder === '1px dotted rgb(187, 212, 238)', type.linkBorder);
+check('map controls keep their own styling', type.strayInMap === 0, `${type.strayInMap} underlined links inside the map`);
+
 // ---------- 2b. Footer provenance ----------
 // A visitor should be able to get from the page to the data and to the code.
 const footer = await page.evaluate(() =>

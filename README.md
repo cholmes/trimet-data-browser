@@ -50,7 +50,7 @@ pnpm run test:unit             # 320 unit tests
 pnpm run lint
 
 node_modules/.bin/vite --port 8080 --strictPort &
-node verify-trimet.mjs         # 28 end-to-end checks against live data
+node verify-trimet.mjs         # 34 end-to-end checks against live data
 ```
 
 `verify-trimet.mjs` is the one that matters for this fork: it asserts the brand colours, the three

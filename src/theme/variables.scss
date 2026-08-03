@@ -10,9 +10,16 @@ $tm-blue:       #214b88;
 $tm-orange:     #c04f2e;
 $tm-green:      #4e8227;
 
-// Supporting neutrals, chosen to sit under the blue.
-$tm-ink:        #1b2c44;
-$tm-slate:      #46586e;
+// developer.trimet.org runs its own, older palette and type. This browser is a
+// companion to the GIS pages there, so body copy and links follow that site
+// rather than trimet.org proper. Values are computed styles read off
+// https://developer.trimet.org/gis/meta_tm_rail_stops.shtml, not eyeballed.
+$tm-link:            #084c8d;  // link colour throughout the developer site
+$tm-link-underline:  #bbd4ee;  // the dotted rule under every link
+$tm-ink:             #2e2d2a;  // body text: a warm near-black, not a blue-black
+
+// Supporting neutrals.
+$tm-slate:      #55514e;  // developer.trimet.org's secondary text grey
 $tm-mist:       #f4f7fa;
 
 // Height of the TriMet header bar.
@@ -48,30 +55,46 @@ $grid-breakpoints: (
   xxxl: 2500px
 );
 
-// Font size
-$font-size-base: 0.95rem;
-// Source Sans Pro is the family trimet.org itself loads, and the one TriMet's
-// vector tiles carry glyphs for, so labels on the map match labels around it.
-$font-family-sans-serif: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// 0.9rem is 14.4px, the computed body size on the GIS metadata pages, with
+// their 18px leading (1.25).
+$font-size-base: 0.9rem;
+$line-height-base: 1.25;
+
+// The exact stack developer.trimet.org serves. Trebuchet MS is a core web font
+// on Windows and macOS; elsewhere this falls back to Arial exactly as the
+// developer site does, so the two degrade together.
+$font-family-sans-serif: "Trebuchet MS", Arial, Helvetica, sans-serif;
 // Fonts for headings
 $headings-font-family: $font-family-sans-serif;
 // Fonts for code
 $font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-// Heading sizes
-$h1-font-size: 2rem;
-$h2-font-size: 1.4rem;
-$h3-font-size: 1.25rem;
-$h4-font-size: 1.1rem;
+// The TRIMET wordmark is a logotype, not body copy, and stays on the family
+// that matches trimet.org's own header. developer.trimet.org sets its banner in
+// an image, so there is nothing there to match.
+$tm-wordmark-font: "Source Sans Pro", "Trebuchet MS", Arial, sans-serif;
+
+// Heading sizes. 1.15rem is 18.4px, the GIS pages' section-head size; the page
+// title stays larger because it is this app's primary wayfinding, a job the
+// developer site gives to its banner instead.
+$h1-font-size: 1.8rem;
+$h2-font-size: 1.15rem;
+$h3-font-size: 1.05rem;
+$h4-font-size: 1rem;
+
+// 1.3 is the GIS pages' heading leading.
+$headings-line-height: 1.3;
 
 // Heading color
 $headings-color: $tm-ink;
 
-// Links
-$link-color: $primary;
+// Links. The developer site draws its underline as a dotted bottom border, not
+// text-decoration, so both decoration hooks stay off and custom.scss owns the
+// rule. See the a-selector there.
+$link-color: $tm-link;
 $link-decoration: none;
-$link-hover-color: darken($link-color, 15%);
-$link-hover-decoration: underline;
+$link-hover-color: $tm-link;
+$link-hover-decoration: none;
 
 // Margin between the main sections of the page (header, content, footer)
 $block-margin: 1rem;

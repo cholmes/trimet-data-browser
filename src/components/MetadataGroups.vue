@@ -336,21 +336,24 @@ export default {
         justify-content: space-between;
         cursor: pointer;
         padding: 0.5rem 0;
-        border-bottom: 1px solid #e8ecef;
+        border-bottom: 1px solid rgba($tm-ink, 0.12);
 
+        // A collapsible section head is still a heading, so it takes the
+        // heading colour rather than the cool slate this inherited, which
+        // clashed with the warm text of the rest of the page.
         h3 {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #4a5c6e;
+          font-size: $h3-font-size;
+          font-weight: 700;
+          color: $headings-color;
         }
 
         svg {
-          color: #4a5c6e;
+          color: $tm-slate;
         }
 
         &:hover {
           h3, svg {
-            color: #1e3a5f;
+            color: $tm-link;
           }
         }
       }
