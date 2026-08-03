@@ -10,7 +10,9 @@ jobs:
     permissions:
       contents: write
     env:
-      SB_pathPrefix: "/"
+      # A project page, so the site lives under a subpath. Hash routing is
+      # required: GitHub Pages does no server-side rewriting.
+      SB_pathPrefix: "/trimet-data-browser/"
       SB_historyMode: "hash"
     steps:
       - uses: actions/checkout@v4

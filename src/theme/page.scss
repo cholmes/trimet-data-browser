@@ -19,6 +19,12 @@ body {
   height: 100%;
   min-height: 100%;
   gap: $block-margin;
+  // The TriMet header breaks out to the viewport edges with a 50vw calc. 50vw
+  // counts the scrollbar gutter, so without clipping the overflow it can add a
+  // horizontal scrollbar, which narrows the viewport, which resizes the header.
+  // Clipping breaks that loop. `clip` rather than `hidden` so it does not turn
+  // the container into a scroll port for sticky descendants.
+  overflow-x: clip;
 
   @include media-breakpoint-only(xxxl) {
     max-width: 75vw;
@@ -31,29 +37,16 @@ body {
     margin-right: (-$block-margin);
     padding-left: $block-margin;
     padding-right: $block-margin;
-    background: rgba(255, 255, 255, 0.25);
+    // Opaque, not upstream's 25% white: the map underlaps this row, and with the
+    // dark basemaps the page title was showing through and became unreadable.
+    background: $body-bg;
 
     .btn-outline-primary {
       background-color: white;
     }
 
-    .site {
-      border-bottom: 3px solid $primary;
-
-      > .col-md-12 {
-        > .title {
-          > span {
-            font-size: 1.5rem;
-            font-weight: 600;
-          }
-        }
-
-        .logo {
-          max-height: $logo-image-height;
-        }
-      }
-    }
-    .site,
+    // Upstream's `.site` row (logo, catalog title, nav buttons) is replaced by
+    // TriMetHeader, which styles itself. Only the page title strip remains.
     .page {
       padding: $block-margin 0;
 
@@ -92,13 +85,6 @@ body {
               font-size: 1.75rem;
             }
           }
-        }
-      }
-    }
-    .site {
-      > .col-md-12 {
-        > .title {
-          justify-content: center;
         }
       }
     }
@@ -150,7 +136,7 @@ body {
   }
 
   h2 {
-    color: #202a4f;
+    color: $tm-ink;
     font-weight: 700;
   }
 

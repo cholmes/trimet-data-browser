@@ -1,6 +1,12 @@
 function catchAllString(route) {
   const pathMatch = route.params.pathMatch;
-  return Array.isArray(pathMatch) ? pathMatch.join("/") : pathMatch;
+  if (Array.isArray(pathMatch)) {
+    return pathMatch.join("/");
+  }
+  // vue-router drops an optional repeatable param entirely when it matches
+  // nothing, so the root path "/" arrives with no pathMatch at all. Callers
+  // treat the result as a string, so return one.
+  return pathMatch ?? "";
 }
 
 function getPath(route, config) {

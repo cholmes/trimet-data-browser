@@ -2,7 +2,7 @@ import { mapState } from 'vuex';
 import maplibregl from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
 import { markRaw } from 'vue';
-import configureBasemap from '../../../basemaps.config';
+import configureBasemap, { MAP_CONSTRAINTS } from '../../../basemaps.config';
 
 export const pmtilesProtocol = new Protocol({ metadata: true });
 maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
@@ -42,8 +42,7 @@ export default {
       this.map = markRaw(new maplibregl.Map({
         container: element,
         style: { version: 8, sources: {}, layers: [] },
-        center: [0, 0],
-        zoom: 1,
+        ...MAP_CONSTRAINTS,
         attributionControl: false,
         interactive: !onfocusOnly,
         maxTileCacheSize: 300,

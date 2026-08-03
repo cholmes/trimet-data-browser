@@ -1,32 +1,20 @@
 export default {
-    catalogUrl: null,
-    catalogTitle: "Portolan Browser",
-    catalogImage: "/portolan-logo.svg",
-    allowExternalAccess: true, // Must be true if catalogUrl is not given
-    allowedDomains: [],
+    // The TriMet catalog on Source Cooperative. Override with SB_catalogUrl to
+    // point at a local copy while developing — see AGENTS.md.
+    catalogUrl: "https://data.source.coop/cholmes/trimet/catalog.json",
+    catalogTitle: "TriMet Data Browser",
+    // TriMetHeader draws the wordmark itself, so there is no logo to resolve.
+    catalogImage: null,
+    // This browser serves one catalog; it is not a general STAC viewer.
+    allowExternalAccess: false,
+    allowedDomains: ["data.source.coop"],
     detectLocaleFromBrowser: true,
     storeLocale: true,
     locale: "en",
     fallbackLocale: "en",
+    // The catalog is English-only, so the language chooser has nothing to offer.
     supportedLocales: [
-        "de",
-        "ar",
-//      "de-CH",
-        "es",
-        "en",
-//      "en-GB",
-//      "en-US",
-        "fr",
-//      "fr-CA",
-//      "fr-CH",
-        "it",
-//      "it-CH",
-        "ro",
-        "ja",
-        "pt",
-//      "pt-BR",
-        "id",
-        "pl"
+        "en"
     ],
     apiCatalogPriority: null,
     useTileLayerAsFallback: false,
@@ -36,6 +24,7 @@ export default {
     displayOverviewsForChildren: false,
     buildTileUrlTemplate: null,
     getMapSourceOptions: null,
+    // Overridden at build time by the Pages deploy; "/" keeps dev at the root.
     pathPrefix: "/",
     historyMode: "hash",
     cardViewMode: "cards",
@@ -55,5 +44,9 @@ export default {
     preprocessSTAC: null,
     authConfig: null,
     crs: {},
-    footerLinks: null
+    footerLinks: [
+        { label: "TriMet", url: "https://trimet.org/" },
+        { label: "TriMet GIS Data", url: "https://developer.trimet.org/gis/" },
+        { label: "Catalog on Source Cooperative", url: "https://source.coop/cholmes/trimet" }
+    ]
 };

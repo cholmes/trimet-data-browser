@@ -1,12 +1,15 @@
 name: Playwright Tests
 
+# Manual only. This suite is inherited from portolan-browser and asserts the
+# upstream product shape: a data-source picker at "/", /external/ routing, and an
+# API-backed search page. This fork serves one fixed catalog with
+# allowExternalAccess disabled, so most of those premises no longer hold and the
+# suite fails by design rather than by regression.
+#
+# The files are kept unchanged so merges from upstream stay clean. Fork-specific
+# behaviour — branding, the three TriMet basemaps, the metro bounds — is covered
+# by verify-trimet.mjs instead; see AGENTS.md.
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:

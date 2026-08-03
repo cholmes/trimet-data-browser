@@ -1,22 +1,39 @@
-// Default Theme for STAC Browser
+// TriMet Data Browser theme.
 
 // Most of the variables below are Bootstrap variables, see https://getbootstrap.com/docs/5.0/customize/color/ for details.
 // For simplicity we just provide some common options as default, but you can override all Bootstrap Sass variables.
+
+// TriMet brand palette, sampled from the agency's own header rather than guessed.
+// These are the single source of truth for brand colour — components reference
+// them, never the literals.
+$tm-blue:       #214b88;
+$tm-orange:     #c04f2e;
+$tm-green:      #4e8227;
+
+// Supporting neutrals, chosen to sit under the blue.
+$tm-ink:        #1b2c44;
+$tm-slate:      #46586e;
+$tm-mist:       #f4f7fa;
+
+// Height of the TriMet header bar.
+$tm-header-height: 3.5rem;
 
 $logo-image-height: 2.5rem;
 
 // Background and text default colors
 $body-bg: white;
-$body-color: #202a4f;
+$body-color: $tm-ink;
 
-$primary:       #4163cc;
-$secondary:     #343e63;
-$success:       #2d8659;
+$primary:       $tm-blue;
+$secondary:     $tm-slate;
+$success:       $tm-green;
 $info:          #3670a0;
 $warning:       #e5a100;
-$danger:        #c44040;
-$light:         #f5f7fb;
-$dark:          #202a4f;
+// Deliberately a true red rather than the brand orange, which reads as a
+// highlight here and not as an error.
+$danger:        #c0392b;
+$light:         $tm-mist;
+$dark:          $tm-ink;
 
 $min-contrast-ratio:   3;
 
@@ -33,10 +50,11 @@ $grid-breakpoints: (
 
 // Font size
 $font-size-base: 0.95rem;
-// Fonts for normal text
-$font-family-sans-serif: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// Source Sans Pro is the family trimet.org itself loads, and the one TriMet's
+// vector tiles carry glyphs for, so labels on the map match labels around it.
+$font-family-sans-serif: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 // Fonts for headings
-$headings-font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$headings-font-family: $font-family-sans-serif;
 // Fonts for code
 $font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
@@ -47,7 +65,7 @@ $h3-font-size: 1.25rem;
 $h4-font-size: 1.1rem;
 
 // Heading color
-$headings-color: #202a4f;
+$headings-color: $tm-ink;
 
 // Links
 $link-color: $primary;

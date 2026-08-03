@@ -1,73 +1,90 @@
-<!-- ops-sync:begin — synced from portolan-sdi/portolan-ops. Edit there, not here. -->
-# Portolan Agent Norms
+# TriMet Data Browser — Agent Notes
 
-These rules apply to AI agents working in any portolan-sdi repo. Every downstream repo carries this text verbatim as a synced block at the top of its own `AGENTS.md`. Repo-specific instructions live below the block and override the canonical rules in that repo only.
+A TriMet-branded fork of [portolan-browser](https://github.com/portolan-sdi/portolan-browser), which
+is itself a fork of [STAC Browser](https://github.com/radiantearth/stac-browser). It serves one
+catalog: the TriMet geospatial data mirror at `data.source.coop/cholmes/trimet`.
 
-Claude Code does not read `AGENTS.md`. Each repo carries a one-line `CLAUDE.md` that imports it instead. Put repo-specific instructions in `AGENTS.md`, never in `CLAUDE.md`, which the sync overwrites.
+This repo is personal, not part of the Portolan org. The portolan-ops norms — the PR body contract,
+VOICE.md, the issue templates — do not apply here. What follows does.
 
-## Ground Rules
+## Where the Customization Lives
 
-The [portolan-spec](https://github.com/portolan-sdi/portolan-spec) repo is ground truth for the Portolan standard. The CLI, validator, registry, and every other tool implement the spec. They are downstream of it. Never describe the CLI as the source of truth. Propose spec changes in portolan-spec.
+Everything that makes this a TriMet browser rather than a generic one sits in six places. Change
+these; leave the rest of the tree matching upstream so `git pull upstream main` stays cheap.
 
-Before documenting any command, flag, or API, verify it exists in the shipped tool. A fabricated example persists beyond the session that wrote it.
+| File | Owns |
+| --- | --- |
+| `basemaps.config.js` | The three TriMet basemaps and `MAP_CONSTRAINTS` (bounds, zoom limits, home view) |
+| `src/components/TriMetHeader.vue` | The blue bar, wordmark, stripes, MENU button |
+| `src/theme/variables.scss` | The palette and fonts, as Sass variables |
+| `src/theme/custom.scss` | Component-level styling, referencing those variables |
+| `config.js` | Catalog URL, title, locales, footer links |
+| `index.html` | Favicon, font link, meta tags |
 
-Every repo uses Apache-2.0 except portolan-browser and portolan-nl-demo, which are ISC forks. See [norms/repos.md](https://github.com/portolan-sdi/portolan-ops/blob/main/norms/repos.md) for the record. Never introduce code under another license without a human decision recorded there.
+Brand values have exactly one home: `$tm-blue`, `$tm-orange`, `$tm-green` in `variables.scss`. Do not
+paste hex literals into components — that is the mistake this fork inherited from its parent and
+cleaned up.
 
-Never bypass pre-commit hooks or CI gates. Green means green.
+## Brand Facts
 
-Write commits in conventional form. Squash-merge makes the pull request title become the commit message.
+Sampled from TriMet's own header, not guessed:
 
-## Pull Requests and Issues
+- Blue `#214B88` — header bar
+- Orange `#C04F2E` — diagonal stripes
+- Green `#4E8227` — MENU button
+- Source Sans Pro (300/400/600/700), the same family trimet.org loads
 
-A reviewer should finish a pull request body in under a minute. They should know what changed, why, and that it works. CI lints every body on each push and edit. The contract requires:
+The wordmark is rebuilt in markup — `TRI` + the swirl mark + `MET` — because TriMet publishes no
+usable SVG. The swirl in `public/trimet-swirl.png` came from the catalog's `_assets/`.
 
-- The sections `## What this changes`, `## Why`, and `## Verification` exist and are not empty.
-- 200 words outside code blocks. No section longer than six lines. Fenced blocks are unlimited, so evidence never competes with the budget.
-- The prose references the issue the change resolves, as `#N` or its URL.
-- Verification pastes the command you ran and its output in a fenced block under `## Verification`. It names the data it read, as a URL or catalog path.
-- A change that alters no behavior ticks the waiver checkbox instead. Keep its wording intact because the check matches the phrase "does not alter behavior".
+## Local Development
 
-Good evidence shows the fix works against real data. Just proving a command exits zero is not enough. Take the failing command from the issue, run it against the same catalog, and show it now succeeds. A wall of pytest output does not count.
+The catalog lives at `https://data.source.coop/cholmes/trimet/catalog.json`. To work against a local
+copy instead:
 
-Issues follow the same rules. A bug report must include the exact reproduction steps. A feature request must show where the current tool falls short. A task must include the command that proves it is done.
+```sh
+npx serve ~/repos/portolan-catalog-trimet/catalog --cors -l 8081
+SB_catalogUrl=http://localhost:8081/catalog.json pnpm start
+```
 
-Every repo uses the org issue template. The CI check rejects blank issues. On pull requests, it fails the check. On issues, it adds the `needs-rewrite` label and leaves a comment once. Dependabot is exempt.
+Any `SB_*` environment variable overrides the matching key in `config.js`.
 
-## Documentation
+## Verification
 
-Agents writing or restructuring documentation follow two exemplars named in [norms/docs.md](https://github.com/portolan-sdi/portolan-ops/blob/main/norms/docs.md). [obstore](https://github.com/developmentseed/obstore) demonstrates a concise, human-readable README that delegates to good docs elsewhere. [scaffold-docs-skill](https://github.com/dbreunig/scaffold-docs-skill) shows how to build docs that have a clear human-facing surface, maintain examples via tests so they never drift, and auto-generate API docs instead of duplicating them. Both keep documentation maintainable and robust. Draft top-down with human review between layers. Do not draft a README from a generic template or from memory.
+`verify-trimet.mjs` is this fork's real test. It drives a browser against the live
+catalog and tiles.trimet.org and asserts the things this fork actually promises: the exact
+brand colours, the wordmark, the three basemaps and that each one switches, the metro
+bounds clamping both pan and zoom, and that a collection's data renders over the basemap.
 
-Three rules apply to every docs change. Use title-case headings without emoji. Use absolute dates like "in July 2026", never "recently". Command examples must have been actually run against the shipped tool.
+```sh
+node_modules/.bin/vite --port 8080 --strictPort &
+node verify-trimet.mjs          # 22 checks, screenshots in ./verify-out
+```
 
-## Voice and Messaging
+`tests/unit` (310 tests) still applies and runs in CI.
 
-Every written artifact follows [VOICE.md](https://github.com/portolan-sdi/portolan-ops/blob/main/VOICE.md). This includes READMEs, PR and issue bodies, commit message bodies, docs, and lasting code comments. Apply it while drafting, not as cleanup.
+`tests/e2e` does not. That suite is inherited and asserts the upstream product — a
+data-source picker at `/`, `/external/` routing, an API-backed search page — none of which
+this fork has. Its workflow is manual-only for that reason. The files are left untouched so
+merges from upstream stay clean; do not "fix" them to pass against this configuration.
 
-Before drafting substantial public copy like a README, a docs page, or an announcement, fetch and read [VOICE.md](https://github.com/portolan-sdi/portolan-ops/blob/main/VOICE.md) and [copy/messaging.md](https://github.com/portolan-sdi/portolan-ops/blob/main/copy/messaging.md) in full. If you cannot fetch them, say so and stop. Write from the actual files, not from memory.
+Note that MapLibre only renders when the page is actually visible. Automation that drives a
+backgrounded tab will show an inert map with no style loaded and no tile requests, which
+looks exactly like a broken basemap. Verify maps through this script, not a hidden tab.
 
-How Portolan is described comes from [copy/messaging.md](https://github.com/portolan-sdi/portolan-ops/blob/main/copy/messaging.md) alone.
+## Upstream
 
-## Org-Wide Facts
+`upstream` points at portolan-sdi/portolan-browser. Pull improvements with `git pull upstream main`.
+Conflicts will concentrate in the six files above, which is why they are kept small and separate.
 
-The canonical homepage is https://www.portolan-sdi.org/. Canonical URLs live in [copy/urls.md](https://github.com/portolan-sdi/portolan-ops/blob/main/copy/urls.md). Do not hardcode variants.
+`gh` commands default to `origin` (this repo). That is deliberate — do not add a fork relationship.
 
-Community discussion happens in the [Portolan Google Group](https://groups.google.com/g/portolan) and the [Portolan channel](https://cloudnativegeo.slack.com/archives/C0A1JBH9529) in Cloud-Native Geo Slack. Planning lives in [org-level GitHub projects](https://github.com/orgs/portolan-sdi/projects/1).
+## Working Rules
 
-## Contribution Rules
+Verify before claiming. This is a visual project: a change to the header or a basemap is not done
+until it has been loaded in a browser and looked at. Screenshots beat assertions.
 
-The [AI policy](https://github.com/portolan-sdi/portolan-ops/blob/main/policies/AI_POLICY.md) applies to every contribution. An agent may draft the diff and the pull request body. A human must read, understand, and approve both before review is requested. Agents never open PRs, post comments, or take action in shared spaces without human approval.
+Never fabricate a tile URL, a style name, or a hex value. Every one in this repo was fetched or
+sampled. If you need a new one, go get it.
 
-Follow the [contributing guide](https://github.com/portolan-sdi/portolan-ops/blob/main/policies/CONTRIBUTING.md) and the [code of conduct](https://github.com/portolan-sdi/portolan-ops/blob/main/policies/CODE_OF_CONDUCT.md).
-
-## Sync Discipline
-
-Files between `ops-sync` markers are synced from [portolan-ops](https://github.com/portolan-sdi/portolan-ops). They are overwritten on every sync run. To change one, edit it in portolan-ops, never in place.
-
-One canonical home per fact. If a value like a color, URL, or policy line exists in portolan-ops, link to it rather than copying it.
-<!-- ops-sync:end -->
-
-# Repo-specific instructions
-
-<!-- Add instructions for this repo below. The block above is overwritten by
-     sync. This file is the only home for repo-specific agent rules: CLAUDE.md
-     carries the import and nothing else. -->
+The catalog is the source of truth for what data exists. Read it; do not infer collection names.
