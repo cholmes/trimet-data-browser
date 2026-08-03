@@ -44,9 +44,11 @@ export default {
     preprocessSTAC: null,
     authConfig: null,
     crs: {},
+    // Where the data comes from, then where the data and this site live.
     footerLinks: [
         { label: "TriMet", url: "https://trimet.org/" },
         { label: "TriMet GIS Data", url: "https://developer.trimet.org/gis/" },
-        { label: "Catalog on Source Cooperative", url: "https://source.coop/cholmes/trimet" }
+        { label: "Catalog on Source Cooperative", url: "https://source.coop/cholmes/trimet" },
+        { label: "Source code on GitHub", url: "https://github.com/cholmes/trimet-data-browser" }
     ]
 };

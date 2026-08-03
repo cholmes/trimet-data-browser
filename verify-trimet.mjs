@@ -97,6 +97,16 @@ check('wordmark reads TRIMET', header.brandText?.startsWith('TRIMET'), header.br
 check('swirl asset referenced', !!header.swirlSrc, header.swirlSrc);
 check('no horizontal overflow', header.hOverflow === 0, `${header.hOverflow}px`);
 
+// ---------- 2b. Footer provenance ----------
+// A visitor should be able to get from the page to the data and to the code.
+const footer = await page.evaluate(() =>
+  [...document.querySelectorAll('footer a')].map(a => ({ text: a.innerText.trim(), href: a.href }))
+);
+const repoLink = footer.find(l => l.href === 'https://github.com/cholmes/trimet-data-browser');
+check('footer links to this site\'s source', !!repoLink, repoLink ? repoLink.text : footer.map(l => l.text).join(' | '));
+check('footer links to the catalog', footer.some(l => l.href.includes('source.coop/cholmes/trimet')),
+  footer.map(l => l.text).join(' | '));
+
 // ---------- 3. Collection map ----------
 await page.goto(`${BASE}/#/routes/collection.json`, { waitUntil: 'networkidle' });
 await page.waitForSelector('.maplibregl-map', { timeout: 30000 });

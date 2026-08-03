@@ -78,7 +78,7 @@ bounds clamping both pan and zoom, and that a collection's data renders over the
 
 ```sh
 node_modules/.bin/vite --port 8080 --strictPort &
-node verify-trimet.mjs          # 26 checks, screenshots in ./verify-out
+node verify-trimet.mjs          # 28 checks, screenshots in ./verify-out
 ```
 
 `tests/unit` (320 tests) still applies and runs in CI.
